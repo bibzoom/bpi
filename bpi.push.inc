@@ -145,11 +145,11 @@ function bpi_convert_to_bpi($node, $category, $audience, $with_images = FALSE, $
 
   // Whether the field is a text area with summary, fetch the summary, if not -
   // fetch it's safe value.
-  if (!empty($teaser_field) && isset($teaser_field['#items'][0]['safe_summary'])) {
-    $teaser = $teaser_field['#items'][0]['safe_summary'];
+  if (!empty($teaser_field) && isset($teaser_field['#items'][0]['summary'])) {
+    $teaser = $teaser_field['#items'][0]['summary'];
   }
-  elseif (isset($teaser_field['#items'][0]['safe_value'])) {
-    $teaser = $teaser_field['#items'][0]['safe_value'];
+  elseif (isset($teaser_field['#items'][0]['value'])) {
+    $teaser = $teaser_field['#items'][0]['value'];
   }
   elseif (isset($teaser_field[0]['#markup'])) {
     $teaser = $teaser_field[0]['#markup'];

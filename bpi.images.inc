@@ -239,11 +239,12 @@ function bpi_get_image_type($image_field_name, $node) {
    * We assume that the image type is the last part of the field name, i.e.
    *   field_{{node type}}_{{image type}}
    */
-  $pattern = '/field_' . preg_quote($node->type, '/') . '_(?<image_type>.+)/';
+  /*$pattern = '/field_' . preg_quote($node->type, '/') . '_(?<image_type>.+)/';
   if (preg_match($pattern, $image_field_name, $matches)) {
     return $matches['image_type'];
   }
-  return NULL;
+  return NULL;*/
+  return "title_image";
 }
 
 /**
