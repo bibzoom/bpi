@@ -53,15 +53,13 @@ function bpi_assets_form($form, $form_state, $assets = array()) {
       '#title' => t('Available images'),
     );
 
-    foreach ($assets as $type => $items) {
-      foreach ($items as $index => $asset) {
-        $form['bpi_assets']['asset::' . $type . '::' . $index] = array(
-          '#type' => 'checkbox',
-          '#default_value' => 1,
-          '#prefix' => '<div class="bpi-syndicate-asset"><img src="' . $asset['path'] . '" width="100" height="100" />' . '<br/> (' . bpi_get_image_display_name($asset['type']) . ')',
-          '#suffix' => '</div>',
-        );
-      }
+ foreach ($assets as $asset => $url) {
+      $form['bpi_assets'][$asset] = array(
+        '#type' => 'checkbox',
+        '#default_value' => 1,
+        '#prefix' => '<div class="bpi-syndicate-asset"><img src="' . $url . '" width="100" height="100" />',
+        '#suffix' => '</div>',
+      );
     }
   }
 
@@ -89,45 +87,27 @@ function bpi_assets_form($form, $form_state, $assets = array()) {
  * @ingroup forms
  */
 function bpi_assets_form_submit($form, &$form_state) {
-  $bpi_assets = $_SESSION['bpi']['assets'];
-
+  $input = array_keys($form_state['input']);
   $assets = array();
-
-  // Find syndicated assets in posted data.
-  foreach ($form_state['input'] as $name => $value) {
-    if (preg_match('/^asset::(?<type>[^:]+)::(?<index>[^_]+)$/', $name, $matches) && !empty($value)) {
-      $type = $matches['type'];
-      $index = $matches['index'];
-      if (isset($bpi_assets[$type][$index])) {
-        $assets[] = $bpi_assets[$type][$index];
+  // Seek the assets.
+  foreach ($input as $value) {
+    if (preg_match('/^asset(\d+)*/', $value) && !empty($form_state['input'][$value])) {
+      if (isset($_SESSION['bpi']['assets'][$value])) {
+        $assets[] = $_SESSION['bpi']['assets'][$value];
       }
     }
   }
-
   unset($_SESSION['bpi']['assets']);
-
-  // Group syndicated images by type.
-  $syndicated_images = array();
-  $status = TRUE;
-  foreach ($assets as $asset) {
-    $filename = $asset['type'] . '/' . uniqid() . '.' . $asset['extension'];
-    $managed_file = bpi_fetch_image('public://bpi/' . $filename, $asset['path']);
-
+  foreach ($assets as $path) {
+    $filename = basename($path);
+    $managed_file = bpi_fetch_image('public://bpi/' . $filename, $path);
+    $status = TRUE;
     if (!is_object($managed_file)) {
       $status = FALSE;
     }
-    else {
-      if (!isset($syndicated_images[$asset['type']])) {
-        $syndicated_images[$asset['type']] = array();
-      }
-      $syndicated_images[$asset['type']][] = $asset + array('@managed_file' => $managed_file);
-    }
   }
-
-  if (isset($status) && $status) {
+  if ($status) {
     drupal_set_message(t('Images downloaded successfully.'));
-    // Store syndicated images for use in content edit form.
-    bpi_set_syndicated_images($syndicated_images);
   }
   else {
     drupal_set_message(t('Not all images were fetched successfully, check reports for more info.'));
@@ -239,12 +219,11 @@ function bpi_get_image_type($image_field_name, $node) {
    * We assume that the image type is the last part of the field name, i.e.
    *   field_{{node type}}_{{image type}}
    */
-  /*$pattern = '/field_' . preg_quote($node->type, '/') . '_(?<image_type>.+)/';
+  $pattern = '/field_' . preg_quote($node->type, '/') . '_(?<image_type>.+)/';
   if (preg_match($pattern, $image_field_name, $matches)) {
     return $matches['image_type'];
   }
-  return NULL;*/
-  return "title_image";
+  return NULL;
 }
 
 /**
