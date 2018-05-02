@@ -277,7 +277,8 @@ function bpi_form_node_form_alter(&$form, &$form_state, $form_id) {
       return;
     }
 
-    $form['title']['#default_value'] = isset($bpi_content['title']) ? $bpi_content['title'] : '';
+    //$form['title']['#default_value'] = isset($bpi_content['title']) ? $bpi_content['title'] : '';
+    $form['title_field']['und'][0]['value']['#default_value'] = isset($bpi_content['title']) ? $bpi_content['title'] : '';
     $teaser = variable_get('bpi_field_teaser', '');
     $body = variable_get('bpi_field_body', '');
     $materials_field = variable_get('bpi_field_materials', '');
