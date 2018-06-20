@@ -136,10 +136,12 @@ function bpi_convert_to_bpi($node, $category, $audience, $with_images = FALSE, $
   $bpi_content['lastname'] = '';
 
   $bpi_content['title'] = $node->title;
-
-
+  /*
+   * Custom bibzoom field bpi content
+   */
+  $written_by = isset($node->field_writer_name['und'][0]['value']) ? $node->field_writer_name['und'][0]['value'] : "";
   $teaser_field = field_view_field('node', $node, variable_get('bpi_field_teaser', ''));
-  $body_field = field_view_field('node', $node, variable_get('bpi_field_body', ''));
+  $body_field =  field_view_field('node', $node, variable_get('bpi_field_body', ''));
   $teaser = '';
   $body = '';
 
@@ -192,11 +194,18 @@ function bpi_convert_to_bpi($node, $category, $audience, $with_images = FALSE, $
 
   if (!empty($body_field) && isset($body_field['#items'][0]['safe_value'])) {
     $body = $body_field['#items'][0]['safe_value'];
+    if($written_by != "")
+    {
+        $body = "Af: ".$written_by."<br><br>" . $body;
+    }
   }
   elseif (isset($body_field[0]['#markup'])) {
     $body = $body_field[0]['#markup'];
+    if($written_by != "")
+    {
+        $body = "Af: ".$written_by."<br><br>" . $body;
+    }
   }
-
   // Empty the teaser, if body and teaser are mapped to same fields
   // and the values are identical.
   if ($teaser === $body) {
